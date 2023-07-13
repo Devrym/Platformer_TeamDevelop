@@ -54,6 +54,8 @@ namespace PlatformerGame.Characters
 
         private void Update()
         {
+            if (Character.StateMachine.CurrentState.CanTurn)
+                Facing = Character.MovementDirection;
         }
 
         public static CharacterAnimancerComponent GetCurrent() => Get(AnimancerEvent.CurrentState);
@@ -64,7 +66,55 @@ namespace PlatformerGame.Characters
 
         #region Hit Boxes
 
+        private Dictionary<HitData, HitTrigger> _ActiveHits;
+        private HashSet<Hit.ITarget> _IgnoreHits;
 
+
+        public void AddHitBox(HitData data)
+        {
+            if (_IgnoreHits == null)
+            {
+                ObjectPool.Acquire(out _ActiveHits);
+                ObjectPool.Acquire(out _IgnoreHits);
+            }
+
+            _ActiveHits.Add(data, HitTrigger.Activate(Character, data, FacingLeft, _IgnoreHits));
+        }
+
+        public void RemoveHitBox(HitData data)
+        {
+            if (_ActiveHits != null && _ActiveHits.TryGetValue(data, out var trigger))
+            {
+                trigger.Deactivate();
+                _ActiveHits.Remove(data);
+            }
+        }
+
+        public void EndHitSequence()
+        {
+            if (_IgnoreHits == null)
+                return;
+
+            ClearHitBoxes();
+            ObjectPool.Release(ref _ActiveHits);
+            ObjectPool.Release(ref _IgnoreHits);
+        }
+
+        public void ClearHitBoxes()
+        {
+            if (_ActiveHits != null)
+            {
+                foreach (var trigger in _ActiveHits.Values)
+                    trigger.Deactivate();
+                _ActiveHits.Clear();
+            }
+        }
+
+        protected override void OnDisable()
+        {
+            EndHitSequence();
+            base.OnDisable();
+        }
 
         #endregion
     }

@@ -1,5 +1,6 @@
 using Animancer;
 using Animancer.FSM;
+using PlatformerGame.Characters.States;
 using UnityEngine;
 
 namespace PlatformerGame.Characters
@@ -18,7 +19,13 @@ namespace PlatformerGame.Characters
         private CharacterBody2D _Body;
         public CharacterBody2D Body => _Body;
 
+        [SerializeField]
+        private Health _Health;
+        public Health Health => _Health;
 
+        [SerializeField]
+        private CharacterState _Idle;
+        public CharacterState Idle => _Idle;
 
 
 #if UNITY_EDITOR
@@ -26,6 +33,8 @@ namespace PlatformerGame.Characters
         {
             gameObject.GetComponentInParentOrChildren(ref _Animancer);
             gameObject.GetComponentInParentOrChildren(ref _Body);
+            gameObject.GetComponentInParentOrChildren(ref _Health);
+            gameObject.GetComponentInParentOrChildren(ref _Idle);
         }
 #endif
 
@@ -57,9 +66,17 @@ namespace PlatformerGame.Characters
 
         public bool Run { get; set; }
 
+        public readonly StateMachine<CharacterState>.WithDefault
+            StateMachine = new StateMachine<CharacterState>.WithDefault();
 
         protected virtual void Awake()
         {
+            StateMachine.DefaultState = _Idle;
+
+#if UNITY_ASSERTIONS
+            foreach (Transform child in transform)
+                child.name = $"{child.name} ({name})";
+#endif
         }
 
 #if UNITY_EDITOR
@@ -80,6 +97,11 @@ namespace PlatformerGame.Characters
 
                 target.Run = UnityEditor.EditorGUILayout.Toggle("Run", target.Run);
 
+                UnityEditor.EditorGUI.BeginChangeCheck();
+                var state = UnityEditor.EditorGUILayout.ObjectField(
+                    "Current State", target.StateMachine.CurrentState, typeof(CharacterState), true);
+                if (UnityEditor.EditorGUI.EndChangeCheck())
+                    target.StateMachine.TrySetState((CharacterState)state);
             }
 
         }

@@ -40,6 +40,17 @@ namespace PlatformerGame.Characters.Brains
 
         protected virtual void Update()
         {
+            if (Input.GetButtonDown(_JumpButton))
+                _States.TryJump();
+
+            if (Input.GetButtonUp(_JumpButton))
+                _States.TryIdle();
+
+            if (Input.GetButtonDown(_PrimaryAttackButton))
+                _States.TryPrimaryAttack();
+
+            if (Input.GetButtonDown(_SecondaryAttackButton))
+                _States.TrySecondaryAttack();
 
             _States.Character.Run = Input.GetButton(_RunButton);
             _States.Character.MovementDirection = new Vector2(

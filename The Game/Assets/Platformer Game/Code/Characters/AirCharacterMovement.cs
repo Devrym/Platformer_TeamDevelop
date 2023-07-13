@@ -25,8 +25,9 @@ namespace PlatformerGame.Characters
 
         protected override Vector2 UpdateVelocity(Vector2 velocity)
         {
+            var currentState = Character.StateMachine.CurrentState;
             var brainMovement = Character.MovementDirection;
-            var speedMultiplier = 1;
+            var speedMultiplier = currentState.MovementSpeedMultiplier;
 
             Vector2 targetVelocity;
             if (speedMultiplier == 0)

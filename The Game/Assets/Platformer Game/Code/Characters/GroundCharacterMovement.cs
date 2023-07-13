@@ -32,9 +32,10 @@ namespace PlatformerGame.Characters
         protected override Vector2 UpdateVelocity(Vector2 velocity)
         {
             var brainMovement = Character.MovementDirection.x;
+            var currentState = Character.StateMachine.CurrentState;
 
             var targetSpeed = Character.Run ? _RunSpeed : _WalkSpeed;
-            targetSpeed *= brainMovement * 1;
+            targetSpeed *= brainMovement * currentState.MovementSpeedMultiplier;
 
             if (!Character.Body.IsGrounded)
             {

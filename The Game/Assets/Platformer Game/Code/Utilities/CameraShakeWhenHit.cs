@@ -6,6 +6,10 @@ namespace PlatformerGame
 {
     public sealed class CameraShakeWhenHit : MonoBehaviour
     {
+        [SerializeField]
+        private Health _Health;
+        public Health Health => _Health;
+
         [SerializeField, Multiplier]
         [Tooltip("The shake magnitude to apply regardless of damage taken")]
         private float _BaseMagnitude = 0.3f;
@@ -19,6 +23,7 @@ namespace PlatformerGame
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            gameObject.GetComponentInParentOrChildren(ref _Health);
             PlatformerUtilities.NotNegative(ref _BaseMagnitude);
             PlatformerUtilities.NotNegative(ref _ScalingMagnitude);
         }
@@ -26,6 +31,10 @@ namespace PlatformerGame
 
         private void Awake()
         {
+            _Health.OnHitReceived += (hit) =>
+            {
+                CameraShake.Instance.Magnitude += _BaseMagnitude + hit.damage * _ScalingMagnitude;
+            };
         }
 
     }

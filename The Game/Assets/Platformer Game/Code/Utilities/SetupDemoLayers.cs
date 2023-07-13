@@ -29,6 +29,7 @@ namespace PlatformerGame
             _OriginalHitCollisionMask = Physics2D.GetLayerCollisionMask(DemoHitLayer);
 
             Physics2D.IgnoreLayerCollision(DemoCharacterLayer, DemoCharacterLayer);
+            Physics2D.SetLayerCollisionMask(DemoHitLayer, HitTrigger.HitLayers);
         }
 
         private void OnDestroy()
